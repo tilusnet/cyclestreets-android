@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -93,10 +94,14 @@ public class AddPhotoActivity extends Activity
 		photoView_ = inflater.inflate(R.layout.addphoto, null);
 		{
 			final Button takePhoto = (Button)photoView_.findViewById(R.id.takephoto_button);
-			if(getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
+			try {
+				Camera mCameraDevice = android.hardware.Camera.open();
+				mCameraDevice.release();
 				takePhoto.setOnClickListener(this);
-			else
+			} catch (RuntimeException e) {
+				// Device doesn't have a camera
 				takePhoto.setEnabled(false);
+			}
 		}
 		((Button)photoView_.findViewById(R.id.chooseexisting_button)).setOnClickListener(this);		
 		
