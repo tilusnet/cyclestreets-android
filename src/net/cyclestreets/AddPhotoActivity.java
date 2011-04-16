@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -70,7 +69,7 @@ public class AddPhotoActivity extends Activity
 	
 	private String photoFile_ = null;
 	private Bitmap photo_ = null;
-	private ExifInterface photoExif_ = null;
+//	private ExifInterface photoExif_ = null;
 	
 	private View photoView_;
 	private View photoCaption_;
@@ -117,6 +116,7 @@ public class AddPhotoActivity extends Activity
 		setupView();
 	} // class AddPhotoActivity
 
+	// THQ:  Removed this for 1.5 */
 	@Override 
 	public void onBackPressed()
 	{
@@ -258,11 +258,11 @@ public class AddPhotoActivity extends Activity
         	if(photo_ != null)
         		photo_.recycle();
         	final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-        	decodeOptions.inPurgeable = true;
+        	// decodeOptions.inPurgeable = true;
         	decodeOptions.inSampleSize = 4;
         	photo_ = BitmapFactory.decodeFile(photoFile_, decodeOptions);
         	
-        	photoExif_ = new ExifInterface(photoFile_);
+        	// photoExif_ = new ExifInterface(photoFile_);
 
         	there_.noOverThere(photoLocation());
         	
@@ -331,8 +331,8 @@ public class AddPhotoActivity extends Activity
 	private GeoPoint photoLocation()
 	{
 		final float[] coords = new float[2];
-		if(!photoExif_.getLatLong(coords))
-			return null;
+/*		if(!photoExif_.getLatLong(coords))
+			return null;*/
 		int lat = (int)(((double)coords[0]) * 1E6);
 		int lon = (int)(((double)coords[1]) * 1E6);
 		return new GeoPoint(lat, lon);
@@ -340,7 +340,7 @@ public class AddPhotoActivity extends Activity
 	
 	private String photoTimestamp()
 	{
-		Date date = new Date();
+/*		Date date = new Date();
 		
 		try {
 			final DateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
@@ -352,7 +352,8 @@ public class AddPhotoActivity extends Activity
 			// ah well
 		} // catch
 
-		return Long.toString(date.getTime() / 1000);
+		return Long.toString(date.getTime() / 1000);*/
+		return "";
 	} // photoTimestamp
 
 	///////////////////////////////////////////////////////////////////////////

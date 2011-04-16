@@ -167,13 +167,13 @@ import android.view.MenuItem;
         startActivityForResult(intent, R.string.ic_menu_directions);
 	} // launchRouteDialog
 
-	@Override 
+/*	@Override 
 	public void onBackPressed()
 	{
 		if(!routeSetter_.onBackButton())
 			super.onBackPressed();
 	} // onBackPressed
-	
+*/	
    @Override
    public void onNewJourney() 
    {
