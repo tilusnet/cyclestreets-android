@@ -117,7 +117,7 @@ public class AddPhotoActivity extends Activity
 	} // class AddPhotoActivity
 
 	// THQ:  Removed this for 1.5 */
-	@Override 
+/*	@Override 
 	public void onBackPressed()
 	{
 		if(step_ == AddStep.SUBMIT)
@@ -132,7 +132,7 @@ public class AddPhotoActivity extends Activity
 		step_ = step_.prev();
 		setupView();
 	} // onBackPressed
-	
+*/	
 
 	private void nextStep()
 	{
