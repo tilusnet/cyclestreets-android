@@ -12,9 +12,11 @@ import org.osmdroid.views.overlay.OverlayItem;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
@@ -28,6 +30,11 @@ public class TapToRouteOverlay extends Overlay
 
 	private final Drawable greenWisp_;
 	private final Drawable redWisp_;
+	private final Point screenPos_ = new Point();
+	private final Matrix canvasTransform_ = new Matrix();
+	private final float[] transformValues_ = new float[9];
+	private final Matrix bitmapTransform_ = new Matrix();
+	private final Paint bitmapPaint_ = new Paint();
 
 	private final int offset_;
 	private final float radius_;
@@ -56,8 +63,8 @@ public class TapToRouteOverlay extends Overlay
 		callback_ = callback;
 		
 		final Resources res = context.getResources();
-		greenWisp_ = res.getDrawable(R.drawable.green_wisp_36x30);
-		redWisp_ = res.getDrawable(R.drawable.red_wisp_36x30);
+		greenWisp_ = res.getDrawable(R.drawable.green_wisp_shadow_centred_big);
+		redWisp_ = res.getDrawable(R.drawable.red_wisp_shadow_centred_big);
 
 		offset_ = OverlayHelper.offset(context);
 		radius_ = OverlayHelper.cornerRadius(context);
@@ -130,23 +137,18 @@ public class TapToRouteOverlay extends Overlay
 			return null;
 		final OverlayItem marker = new OverlayItem(label, label, point);
 		marker.setMarker(icon);
-		marker.setMarkerHotspot(new Point(0,30));
+		marker.setMarkerHotspot(OverlayItem.HotspotPlace.BOTTOM_CENTER);
 		return marker;
 	} // addMarker
 
 	////////////////////////////////////////////
 	@Override
-	public void onDraw(final Canvas canvas, final MapView mapView) 
-	{
-	} // onDraw
-	
-	@Override
-	protected void onDrawFinished(final Canvas canvas, final MapView mapView) 
+	public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) 
 	{
         final Projection projection = mapView.getProjection();
         drawMarker(canvas, projection, startItem_);
         drawMarker(canvas, projection, endItem_);
-	} // onDrawFinished
+	} // draw
 	
 	public void drawButtons(final Canvas canvas, final MapView mapView)
 	{
@@ -178,7 +180,8 @@ public class TapToRouteOverlay extends Overlay
         screen.right -= offset_;
         screen.bottom = screen.top + stepBackButton_.height();
 		
-		OverlayHelper.drawRoundRect(canvas, screen, radius_, Brush.Grey);
+		if(!OverlayHelper.drawRoundRect(canvas, screen, radius_, Brush.Grey))
+			return;
 
 		final Rect bounds = new Rect();
 		textBrush_.getTextBounds(msg, 0, msg.length(), bounds);
@@ -192,16 +195,19 @@ public class TapToRouteOverlay extends Overlay
 	{
 		if(marker == null)
 			return;
-		final Point screenPos = new Point();
-		projection.toMapPixels(marker.mGeoPoint, screenPos);
 
-		final Drawable thingToDraw = marker.getDrawable();
-		final int quarterWidth = thingToDraw.getIntrinsicWidth()/4;
-		thingToDraw.setBounds(new Rect(screenPos.x - quarterWidth, 
-									   screenPos.y - thingToDraw.getIntrinsicHeight(), 
-									   screenPos.x + (quarterWidth*3), 
-									   screenPos.y));
-		thingToDraw.draw(canvas);
+		projection.toMapPixels(marker.mGeoPoint, screenPos_);
+		
+		canvas.getMatrix(canvasTransform_);
+		canvasTransform_.getValues(transformValues_);
+		
+		final BitmapDrawable thingToDraw = (BitmapDrawable)marker.getDrawable();
+		final int halfWidth = thingToDraw.getIntrinsicWidth()/2;
+		final int halfHeight = thingToDraw.getIntrinsicHeight()/2;
+		bitmapTransform_.setTranslate(-halfWidth, -halfHeight);
+		bitmapTransform_.postScale(1/transformValues_[Matrix.MSCALE_X], 1/transformValues_[Matrix.MSCALE_Y]);
+		bitmapTransform_.postTranslate(screenPos_.x, screenPos_.y);
+		canvas.drawBitmap(thingToDraw.getBitmap(), bitmapTransform_, bitmapPaint_);
 	} // drawMarker
 
 	//////////////////////////////////////////////
@@ -352,7 +358,7 @@ public class TapToRouteOverlay extends Overlay
 			case WAITING_FOR_START:
 				return "Tap to set Start";
 			case WAITING_FOR_END:
-				return "Tap to set End";
+				return "Tap to set Finish";
 			case WAITING_TO_ROUTE:
 				return "Tap to Route";
 			case ALL_DONE:

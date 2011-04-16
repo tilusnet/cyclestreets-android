@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,7 +21,6 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -88,9 +88,19 @@ public class AddPhotoActivity extends Activity
 		
 		step_ = AddStep.PHOTO;
 
-		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		photoView_ = inflater.inflate(R.layout.addphoto, null);
+		{
+			final Button takePhoto = (Button)photoView_.findViewById(R.id.takephoto_button);
+			if(getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
+				takePhoto.setOnClickListener(this);
+			else
+				takePhoto.setEnabled(false);
+		}
+		((Button)photoView_.findViewById(R.id.chooseexisting_button)).setOnClickListener(this);		
+		
+		
 		photoCaption_ = inflater.inflate(R.layout.addphotocaption, null);
 		photoCategory_ = inflater.inflate(R.layout.addphotocategory, null);
 		photoLocation_ = inflater.inflate(R.layout.addphotolocation, null);
@@ -152,8 +162,6 @@ public class AddPhotoActivity extends Activity
 		{
 		case PHOTO:
 			setContentView(photoView_);
-			setupButtonListener(R.id.takephoto_button);
-			setupButtonListener(R.id.chooseexisting_button);
 			break;
 		case CAPTION:
 			setContentView(photoCaption_);
@@ -169,6 +177,10 @@ public class AddPhotoActivity extends Activity
 			break;
 		case VIEW:
 			setContentView(photoWebView_);
+			{
+				final TextView text = (TextView)photoWebView_.findViewById(R.id.photo_text);
+				text.setText(captionEditText().getText().toString());
+			}
 			break;
 		case DONE:
 			captionEditText().setText("");
@@ -198,7 +210,10 @@ public class AddPhotoActivity extends Activity
 	
 	private void hookUpNext()
 	{
-		setupButtonListener(R.id.next);
+		final Button b = (Button)findViewById(R.id.next);
+		if(b == null)
+			return;
+		b.setOnClickListener(this);		
 	} // hookUpNext
 	
 	private EditText captionEditText() { return (EditText)photoCaption_.findViewById(R.id.caption); }
@@ -210,15 +225,6 @@ public class AddPhotoActivity extends Activity
 		metaCategorySpinner().setAdapter(new CategoryAdapter(this, photomapCategories.metacategories));
 		categorySpinner().setAdapter(new CategoryAdapter(this, photomapCategories.categories));
 	} // setupSpinners
-	
-	private void setupButtonListener(int id)
-	{
-		final Button b = (Button)findViewById(id);
-		if(b == null)
-			return;
-		
-		b.setOnClickListener(this);		
-	} // setupButtonListener
 	
 	@Override
 	public void onClick(final View v) 
@@ -314,9 +320,6 @@ public class AddPhotoActivity extends Activity
 	
 	private void uploadComplete(final String url)
 	{
-		final WebView wv = (WebView)photoWebView_.findViewById(R.id.webview);
-		wv.loadUrl(url);
-
        	nextStep();
 	} // uploadComplete
 	
@@ -418,7 +421,8 @@ public class AddPhotoActivity extends Activity
 	    } // UploadPhotoTask
 		
 		@Override
-		protected void onPreExecute() {
+		protected void onPreExecute() 
+		{
 			super.onPreExecute();
 			progress_.show();
 		} // onPreExecute
