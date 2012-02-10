@@ -42,7 +42,7 @@ import org.osmdroid.util.GeoPoint;
 public class AddPhotoActivity extends Activity 
 							  implements View.OnClickListener
 {
-	private enum AddStep
+	private enum AddStep 
 	{
 		PHOTO(null),
 		CAPTION(PHOTO),
