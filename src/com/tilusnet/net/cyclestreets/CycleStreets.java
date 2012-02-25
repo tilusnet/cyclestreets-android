@@ -1,5 +1,7 @@
 package com.tilusnet.net.cyclestreets;
 
+import com.tilusnet.net.cyclestreets.views.mapsforge.MapsForgeMapActivity;
+
 import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.Context;
@@ -32,6 +34,11 @@ public class CycleStreets extends TabActivity
 	    // Plan route
 	    spec = tabHost.newTabSpec("Route Map").setIndicator("", res.getDrawable(R.drawable.ic_tab_planroute));
 	    spec.setContent(new Intent(this, RouteMapActivity.class));
+	    tabHost.addTab(spec);
+
+	    // Mapsforge Plan route
+	    spec = tabHost.newTabSpec("Mapsforge Route Map").setIndicator("", res.getDrawable(R.drawable.ic_tab_planroute));
+	    spec.setContent(new Intent(this, MapsForgeMapActivity.class));
 	    tabHost.addTab(spec);
 
 	    // Itinerary

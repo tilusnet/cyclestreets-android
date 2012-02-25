@@ -55,5 +55,6 @@
               android:theme="@style/Theme.RouteInputDialog"/>
     <activity android:name=".RouteNumberActivity" 
               android:theme="@style/Theme.RouteInputDialog"/>
+    <activity android:name=".views.mapsforge.MapsForgeMapActivity"></activity>
   </application>
 </manifest>
